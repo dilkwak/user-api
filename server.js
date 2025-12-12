@@ -14,15 +14,12 @@ const ExtractJwt = passportJWT.ExtractJwt;
 const HTTP_PORT = process.env.PORT || 8080;
 
 app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'https://next-js-422.vercel.app'
-    ],
+    origin: '*', 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-//app.use(cors());
+
 app.use(express.json());
 
 const jwtOptions = {
@@ -39,6 +36,10 @@ passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
 }));
 
 app.use(passport.initialize());
+
+app.get("/", (req, res) => {
+    res.json({ message: "User API is running" });
+});
 
 app.post("/api/user/register", (req, res) => {
     userService.registerUser(req.body)
@@ -93,13 +94,19 @@ app.delete("/api/user/favourites/:id",
     }
 );
 
-userService.connect()
-.then(() => {
-    app.listen(HTTP_PORT, () => { console.log("API listening on: " + HTTP_PORT) });
-})
-.catch((err) => {
-    console.log("unable to start the server: " + err);
-    process.exit();
-});
+if (process.env.NODE_ENV !== 'production') {
+    userService.connect()
+    .then(() => {
+        app.listen(HTTP_PORT, () => { console.log("API listening on: " + HTTP_PORT) });
+    })
+    .catch((err) => {
+        console.log("unable to start the server: " + err);
+        process.exit();
+    });
+} else {
+    userService.connect().catch((err) => {
+        console.log("unable to connect to database: " + err);
+    });
+}
 
 module.exports = app;
