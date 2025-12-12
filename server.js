@@ -102,3 +102,4 @@ userService.connect()
     process.exit();
 });
 
+module.exports = app;
