@@ -4,7 +4,6 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 dotenv.config();
 const userService = require("./user-service.js");
-require('dotenv').config();
 const passport = require('passport');
 const passportJWT = require('passport-jwt');
 const jwt = require('jsonwebtoken');
@@ -14,34 +13,32 @@ const ExtractJwt = passportJWT.ExtractJwt;
 
 const HTTP_PORT = process.env.PORT || 8080;
 
+app.use(cors({
+    origin: [
+        'http://localhost:3000',
+        'https://next-js-422.vercel.app'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+//app.use(cors());
+app.use(express.json());
+
 const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("JWT"),
     secretOrKey: process.env.JWT_SECRET
 };
 
 passport.use(new JwtStrategy(jwtOptions, (jwt_payload, done) => {
-    userService.getUserById(jwt_payload._id)
-        .then(user => {
-            if (user) done(null, user);
-            else done(null, false);
-        })
-        .catch(err => done(err, false));
+    if (jwt_payload._id && jwt_payload.userName) {
+        done(null, jwt_payload);
+    } else {
+        done(null, false);
+    }
 }));
 
 app.use(passport.initialize());
-
-
-app.use(express.json());
-app.use(cors());
-
-app.use(cors({
-    origin: [
-        'http://localhost:3000',
-        'https://web422-sage.vercel.app',
-        'https://wpas-a3-fall-2025.vercel.app'
-    ],
-    credentials: true
-}));
 
 app.post("/api/user/register", (req, res) => {
     userService.registerUser(req.body)
