@@ -13,12 +13,17 @@ const ExtractJwt = passportJWT.ExtractJwt;
 
 const HTTP_PORT = process.env.PORT || 8080;
 
-app.options('*', cors({
-    origin: '*', 
+const corsOptions = {
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
+
+app.use(cors(corsOptions));
+
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
