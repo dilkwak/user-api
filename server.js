@@ -40,7 +40,7 @@ app.use(passport.initialize());
 app.get("/", (req, res) => {
     res.json({ message: "User API is running" });
 });
-
+ 
 app.post("/api/user/register", (req, res) => {
     userService.registerUser(req.body)
     .then((msg) => {
